@@ -26,7 +26,7 @@ async def 接続(ctx):
                     await ctx.send('接続済みです。')
                 else:
                     await ctx.voice_client.disconnect()
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.5)
                     await ctx.author.voice.channel.connect()
             else:
                 await ctx.author.voice.channel.connect()
@@ -94,7 +94,7 @@ async def on_voice_state_update(member, before, after):
                     s_quote = urllib.parse.quote(text)
                     mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
                     while member.guild.voice_client.is_playing():
-                        await asyncio.sleep(0.5)
+                        await asyncio.sleep(5)
                     member.guild.voice_client.play(discord.FFmpegPCMAudio(mp3url))
     elif after.channel is None:
         if member.id == client.user.id:
