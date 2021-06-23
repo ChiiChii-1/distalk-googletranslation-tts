@@ -16,20 +16,11 @@ async def on_ready():
     await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | 0/{len(client.guilds)}サーバー'))
 
 @client.command()
-async def 接続(ctx):
-    if ctx.message.guild:
-        if ctx.author.voice is None:
-            await ctx.send('ボイスチャンネルに接続してから呼び出してください。')
-        else:
-            if ctx.guild.voice_client:
-                if ctx.author.voice.channel == ctx.guild.voice_client.channel:
-                    await ctx.send('接続済みです。')
-                else:
-                    await ctx.voice_client.disconnect()
-                    await asyncio.sleep(0.5)
-                    await ctx.author.voice.channel.connect()
-            else:
-                await ctx.author.voice.channel.connect()
+async def join(ctx):
+    print('#voicechannelを取得')
+    vc = ctx.author.voice.channel
+    print('#voicechannelに接続')
+    await vc.connect()
 
 @client.command()
 async def 切断(ctx):
