@@ -26,7 +26,7 @@ async def 接続(ctx):
                     await ctx.send('接続済みです。')
                 else:
                     await ctx.voice_client.disconnect()
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(1)
                     await ctx.author.voice.channel.connect()
             else:
                 await ctx.author.voice.channel.connect()
