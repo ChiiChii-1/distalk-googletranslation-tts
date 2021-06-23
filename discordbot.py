@@ -13,9 +13,12 @@ client = commands.Bot(command_prefix=prefix)
 
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | 0/{len(client.guilds)}サーバー'))
-
-@client.command()
+    print('Logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('------')
+    
+    
 async def join(ctx):
     print('#voicechannelを取得')
     vc = ctx.author.voice.channel
