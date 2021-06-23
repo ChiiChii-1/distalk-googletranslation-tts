@@ -13,17 +13,23 @@ client = commands.Bot(command_prefix=prefix)
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
-    
-    
-async def join(ctx):
-    print('#voicechannelを取得')
-    vc = ctx.author.voice.channel
-    print('#voicechannelに接続')
-    await vc.connect()
+    await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | 0/{len(client.guilds)}サーバー'))
+
+@client.command()
+async def 接続(ctx):
+    if ctx.message.guild:
+        if ctx.author.voice is None:
+            await ctx.send('ボイスチャンネルに接続してから呼び出してください。')
+        else:
+            if ctx.guild.voice_client:
+                if ctx.author.voice.channel == ctx.guild.voice_client.channel:
+                    await ctx.send('接続済みです。')
+                else:
+                    await ctx.voice_client.disconnect()
+                    await asyncio.sleep(0.5)
+                    await ctx.author.voice.channel.connect()
+            else:
+                await ctx.author.voice.channel.connect()
 
 @client.command()
 async def 切断(ctx):
@@ -48,7 +54,7 @@ async def on_message(message):
                 user = await client.fetch_user(uid)
                 username = user.name + '、'
                 text = re.sub(pattern, username, text)
-            pattern = r'https?://tenor.com/view/[\w/:%#\$&\?\(\)~\.=\+\-]+'
+            pattern = r'https://tenor.com/view/[\w/:%#\$&\?\(\)~\.=\+\-]+'
             text = re.sub(pattern, '画像', text)
             pattern = r'https://[\w/:%#\$&\?\(\)~\.=\+\-]+(\.jpg|\.jpeg|\.gif|\.png|\.bmp)'
             text = re.sub(pattern, '、画像', text)
@@ -128,3 +134,4 @@ async def ヘルプ(ctx):
     await ctx.send(message)
 
 client.run(token)
+
