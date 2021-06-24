@@ -11,66 +11,33 @@ lang = os.getenv('DISCORD_BOT_LANG', default='ja')
 token = os.environ['DISCORD_BOT_TOKEN']
 client = commands.Bot(command_prefix=prefix)
 
-# サーバ別に各値を保持
-voice = {} # ボイスチャンネルID
-channel = {} # テキストチャンネルID
-
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | 0/{len(client.guilds)}サーバー'))
 
-# summonコマンドの処理
-@bot.command()
-async def おいで(ctx):
-    global voice
-    global channel
-    # global guild_id
-    guild_id = ctx.guild.id # サーバIDを取得
-    vo_ch = ctx.author.voice # 召喚した人が参加しているボイスチャンネルを取得
+@client.command()
+async def 接続(ctx):
+    if ctx.message.guild:
+        if ctx.author.voice is None:
+            await ctx.send('ボイスチャンネルに接続してから呼び出してください。')
+        else:
+            if ctx.guild.voice_client:
+                if ctx.author.voice.channel == ctx.guild.voice_client.channel:
+                    await ctx.send('接続済みです。')
+                else:
+                    await ctx.voice_client.disconnect()
+                    await asyncio.sleep(0.5)
+                    await ctx.author.voice.channel.connect()
+            else:
+                await ctx.author.voice.channel.connect()
 
-    # サーバを登録
-    add_guild_db(ctx.guild)
-
-    # サーバのプレフィックスを取得
-    guild_deta = ctrl_db.get_guild(str(guild_id))
-    if isinstance(guild_deta, type(None)):
-        prefix = '#'
-    else:
-        prefix = guild_deta.prefix
-
-    # 召喚された時、voiceに情報が残っている場合
-    if guild_id in voice:
-        await voice[guild_id].disconnect()
-        del voice[guild_id] 
-        del channel[guild_id]
-    # 召喚した人がボイスチャンネルにいた場合
-    if not isinstance(vo_ch, type(None)): 
-        voice[guild_id] = await vo_ch.channel.connect()
-        channel[guild_id] = ctx.channel.id
-        noties = get_notify(ctx)
-        await ctx.channel.send('おつかれいじ'.format(prefix))
-        for noty in noties:
-            await ctx.channel.send(noty)
-        if len(noties) != 0:
-           # await ctx.channel.send('喋太郎に何かあれば、だーやまんのお題箱( https://odaibako.net/u/gamerkohei )までお願いします。\r喋太郎の開発、運用等にご協力をお願いします🙌\rhttps://fantia.jp/gamerkohei ')
-    else :
-        await ctx.channel.send('いないやん！嘘つき！')
-
-# byeコマンドの処理            
-@bot.command()
-async def 帰れ(ctx):
-    global guild_id
-    global voice
-    global channel
-    guild_id = ctx.guild.id
-    # コマンドが、呼び出したチャンネルで叩かれている場合
-    if ctx.channel.id == channel[guild_id]:
-        await ctx.channel.send('ガキは糞して寝ろ')
-        await voice[guild_id].disconnect() # ボイスチャンネル切断
-        # 情報を削除
-        del voice[guild_id] 
-        del channel[guild_id]
-
+@client.command()
+async def 切断(ctx):
+    if ctx.message.guild:
+        if ctx.voice_client is None:
+            await ctx.send('ボイスチャンネルに接続していません。')
+        else:
+            await ctx.voice_client.disconnect()
 
 @client.event
 async def on_message(message):
@@ -123,7 +90,7 @@ async def on_voice_state_update(member, before, after):
                 await after.channel.connect()
             else:
                 if member.guild.voice_client.channel is after.channel:
-                 #   text = member.name + 'さんが入室しました'
+                   # text = member.name + 'さんが入室しました'
                     s_quote = urllib.parse.quote(text)
                     mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
                     while member.guild.voice_client.is_playing():
@@ -162,9 +129,8 @@ async def on_command_error(ctx, error):
 async def ヘルプ(ctx):
     message = f'''◆◇◆{client.user.name}の使い方◆◇◆
 {prefix}＋コマンドで命令できます。
-{prefix}おいで：ボイスチャンネルに接続します。
-{prefix}かえれ：ボイスチャンネルから切断します。'''
+{prefix}接続：ボイスチャンネルに接続します。
+{prefix}切断：ボイスチャンネルから切断します。'''
     await ctx.send(message)
 
 client.run(token)
-
