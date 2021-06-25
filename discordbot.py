@@ -16,7 +16,7 @@ async def on_ready():
     await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | 0/{len(client.guilds)}サーバー'))
 
 @client.command()
-async def おいで(ctx):
+async def 接続(ctx):
     if ctx.message.guild:
         if ctx.author.voice is None:
             await ctx.send('ボイスチャンネルに接続してから呼び出してください。')
@@ -32,7 +32,7 @@ async def おいで(ctx):
                 await ctx.author.voice.channel.connect()
 
 @client.command()
-async def 帰れ(ctx):
+async def 切断(ctx):
     if ctx.message.guild:
         if ctx.voice_client is None:
             await ctx.send('ボイスチャンネルに接続していません。')
@@ -90,7 +90,7 @@ async def on_voice_state_update(member, before, after):
                 await after.channel.connect()
             else:
                 if member.guild.voice_client.channel is after.channel:
-                 #   text = member.name + 'さんが入室しました'
+                    text = member.name + 'さんが入室しました'
                     s_quote = urllib.parse.quote(text)
                     mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
                     while member.guild.voice_client.is_playing():
@@ -105,7 +105,7 @@ async def on_voice_state_update(member, before, after):
                     await asyncio.sleep(0.5)
                     await member.guild.voice_client.disconnect()
                 else:
-                 #   text = member.name + 'さんが退室しました'
+                    text = member.name + 'さんが退室しました'
                     s_quote = urllib.parse.quote(text)
                     mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
                     while member.guild.voice_client.is_playing():
@@ -129,8 +129,8 @@ async def on_command_error(ctx, error):
 async def ヘルプ(ctx):
     message = f'''◆◇◆{client.user.name}の使い方◆◇◆
 {prefix}＋コマンドで命令できます。
-{prefix}おいで：ボイスチャンネルに接続します。
-{prefix}帰れ：ボイスチャンネルから切断します。'''
+{prefix}接続：ボイスチャンネルに接続します。
+{prefix}切断：ボイスチャンネルから切断します。'''
     await ctx.send(message)
 
 client.run(token)
