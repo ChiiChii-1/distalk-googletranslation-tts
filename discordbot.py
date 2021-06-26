@@ -86,7 +86,7 @@ async def on_command_error(ctx, error):
     await ctx.send(error_msg)
     
 @client.command()
-async def addchannel(ctx):
+async def 読む(ctx):
     message = 'テキストチャンネルを【】に設定しました。'
     ctx.send(message)
     
