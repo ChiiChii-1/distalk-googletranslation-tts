@@ -93,7 +93,7 @@ async def ヘルプ(ctx):
 {prefix}切断：ボイスチャンネルから切断します。'''
     await ctx.send(message)
     
-    @client.command()
+@client.command()
 async def addchannel(ctx):
     ch = ctx.channel
     #tgtChId = ch.id
