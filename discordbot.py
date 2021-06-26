@@ -87,10 +87,8 @@ async def on_command_error(ctx, error):
     
 @client.command()
 async def addchannel(ctx):
-    ch = ctx.channel
-    #tgtChId = ch.id
-    message = 'テキストチャンネルを【'+｛ ch.name ｝+'】に設定しました。'
-  await ctx.send(message)
+    message = 'テキストチャンネルを【】に設定しました。'
+    ctx.send(message)
     
 @client.command()
 async def ヘルプ(ctx):
