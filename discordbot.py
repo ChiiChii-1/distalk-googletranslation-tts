@@ -84,7 +84,14 @@ async def on_command_error(ctx, error):
     orig_error = getattr(error, 'original', error)
     error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
     await ctx.send(error_msg)
-
+    
+@client.command()
+async def addchannel(ctx):
+    ch = ctx.channel
+    #tgtChId = ch.id
+    message = 'テキストチャンネルを【'+｛ ch.name ｝+'】に設定しました。'
+  await ctx.send(message)
+    
 @client.command()
 async def ヘルプ(ctx):
     message = f'''◆◇◆{client.user.name}の使い方◆◇◆
@@ -93,11 +100,5 @@ async def ヘルプ(ctx):
 {prefix}切断：ボイスチャンネルから切断します。'''
     await ctx.send(message)
     
-@client.command()
-async def addchannel(ctx):
-    ch = ctx.channel
-    #tgtChId = ch.id
-    message = 'テキストチャンネルを【'+｛ ch.name ｝+'】に設定しました。'
-  await ctx.send(message)
 
 client.run(token)
