@@ -87,8 +87,7 @@ async def on_command_error(ctx, error):
     
 @client.command()
 async def 読む(ctx):
-    message = 'テキストチャンネルを【】に設定しました。'
-    ctx.send(message)
+    await ctx.send('テキストチャンネルを【】に設定しました。')
     
 @client.command()
 async def ヘルプ(ctx):
