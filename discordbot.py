@@ -98,6 +98,6 @@ async def addchannel(ctx):
     ch = ctx.channel
     #tgtChId = ch.id
     message = 'テキストチャンネルを【'+｛ ch.name ｝+'】に設定しました。'
-    ctx.send(message)
+  await ctx.send(message)
 
 client.run(token)
