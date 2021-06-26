@@ -92,5 +92,12 @@ async def ヘルプ(ctx):
 {prefix}接続：ボイスチャンネルに接続します。
 {prefix}切断：ボイスチャンネルから切断します。'''
     await ctx.send(message)
+    
+    @client.command()
+async def addchannel(ctx):
+    ch = ctx.channel
+    #tgtChId = ch.id
+    message = 'テキストチャンネルを【'+｛ ch.name ｝+'】に設定しました。'
+    ctx.send(message)
 
 client.run(token)
