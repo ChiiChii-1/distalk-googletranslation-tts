@@ -80,46 +80,6 @@ async def on_message(message):
     await client.process_commands(message)
 
 @client.event
-async def on_voice_state_update(member, before, after):
-    if before.channel is None:
-        if member.id == client.user.id:
-            await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | {len(client.voice_clients)}/{len(client.guilds)}サーバー'))
-        else:
-            if member.guild.voice_client is None:
-                await asyncio.sleep(0.5)
-                await after.channel.connect()
-            else:
-                if member.guild.voice_client.channel is after.channel:
-                    text = member.name + 'さんが入室しました'
-                    s_quote = urllib.parse.quote(text)
-                    mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
-                    while member.guild.voice_client.is_playing():
-                        await asyncio.sleep(0.5)
-                    member.guild.voice_client.play(discord.FFmpegPCMAudio(mp3url))
-    elif after.channel is None:
-        if member.id == client.user.id:
-            await client.change_presence(activity=discord.Game(name=f'{prefix}ヘルプ | {len(client.voice_clients)}/{len(client.guilds)}サーバー'))
-        else:
-            if member.guild.voice_client.channel is before.channel:
-                if len(member.guild.voice_client.channel.members) == 1:
-                    await asyncio.sleep(0.5)
-                    await member.guild.voice_client.disconnect()
-                else:
-                    text = member.name + 'さんが退室しました'
-                    s_quote = urllib.parse.quote(text)
-                    mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
-                    while member.guild.voice_client.is_playing():
-                        await asyncio.sleep(0.5)
-                    member.guild.voice_client.play(discord.FFmpegPCMAudio(mp3url))
-    elif before.channel != after.channel:
-        if member.guild.voice_client.channel is before.channel:
-            if len(member.guild.voice_client.channel.members) == 1 or member.voice.self_mute:
-                await asyncio.sleep(0.5)
-                await member.guild.voice_client.disconnect()
-                await asyncio.sleep(0.5)
-                await after.channel.connect()
-
-@client.event
 async def on_command_error(ctx, error):
     orig_error = getattr(error, 'original', error)
     error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
