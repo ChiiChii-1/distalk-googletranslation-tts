@@ -84,11 +84,7 @@ async def on_command_error(ctx, error):
     orig_error = getattr(error, 'original', error)
     error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
     await ctx.send(error_msg)
-    
-@client.command()
-async def 読む(ctx):
-    await ctx.send('テキストチャンネルを【】に設定しました。')
-    
+       
 @client.command()
 async def ヘルプ(ctx):
     message = f'''◆◇◆{client.user.name}の使い方◆◇◆
