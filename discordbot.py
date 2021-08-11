@@ -88,18 +88,28 @@ async def on_message(message):
         if message.guild.voice_client:
             text = message.content
             text = text.replace('\n', '、')
-            pattern = r'^<@\d*>'
-            if re.match(pattern, text):
-                match = re.search(r'^<@(\d*)>', text)
-                uid = match.group(1)
-                user = await client.fetch_user(uid)
-                username = user.name + '、'
-                text = re.sub(pattern, username, text)
+            pattern = r'<@(\d+)>'
+            match = re.findall(pattern, text)
+            for user_id in match:
+                user = await client.fetch_user(user_id)
+                user_name = f'、{user.name}へのメンション、'
+                text = re.sub(f'<@{user_id}>', user_name, text)
+            pattern = r'<@&(\d+)>'
+            match = re.findall(pattern, text)
+            for role_id in match:
+                role = message.guild.get_role(int(role_id))
+                role_name = f'、{role.name}へのメンション、'
+                text = re.sub(f'<@&{role_id}>', role_name, text)
+            pattern = r'<:([a-zA-Z0-9_]+):\d+>'
+            match = re.findall(pattern, text)
+            for emoji_name in match:
+                emoji_read_name = emoji_name.replace('_', ' ')
+                text = re.sub(rf'<:{emoji_name}:\d+>', f'、{emoji_read_name}、', text)
             pattern = r'https://tenor.com/view/[\w/:%#\$&\?\(\)~\.=\+\-]+'
             text = re.sub(pattern, '画像', text)
-            pattern = r'https://[\w/:%#\$&\?\(\)~\.=\+\-]+(\.jpg|\.jpeg|\.gif|\.png|\.bmp)'
+            pattern = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+(\.jpg|\.jpeg|\.gif|\.png|\.bmp)'
             text = re.sub(pattern, '、画像', text)
-            pattern = r'https://[\w/:%#\$&\?\(\)~\.=\+\-]+'
+            pattern = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+'
             text = re.sub(pattern, '、URL', text)
             text = message.author.name + '、' + text
             if text[-1:] == 'w' or text[-1:] == 'W' or text[-1:] == 'ｗ' or text[-1:] == 'W':
@@ -108,28 +118,65 @@ async def on_message(message):
                 text = text[:-1] + '、ワラ'
             if message.attachments:
                 text += '、添付ファイル'
-            if len(text) < 100:
-                s_quote = urllib.parse.quote(text)
-                mp3url = 'http://translate.google.com/translate_tts?ie=UTF-8&q=' + s_quote + '&tl=' + lang + '&client=tw-ob'
-                while message.guild.voice_client.is_playing():
-                    await asyncio.sleep(0.5)
-                message.guild.voice_client.play(discord.FFmpegPCMAudio(mp3url))
-            else:
-                await message.channel.send('100文字以上は読み上げできません。')
+            while message.guild.voice_client.is_playing():
+                await asyncio.sleep(0.5)
+            tts(text)
+            source = discord.FFmpegPCMAudio('/tmp/message.mp3')
+            message.guild.voice_client.play(source)
         else:
             pass
     await client.process_commands(message)
+
+@client.event
+async def on_voice_state_update(member, before, after):
+    if before.channel is None:
+        if member.id == client.user.id:
+            presence = f'{prefix}ヘルプ | {len(client.voice_clients)}/{len(client.guilds)}サーバー'
+            await client.change_presence(activity=discord.Game(name=presence))
+        else:
+            if member.guild.voice_client is None:
+                await asyncio.sleep(0.5)
+                await after.channel.connect()
+            else:
+                if member.guild.voice_client.channel is after.channel:
+                    text = member.name + 'さんが入室しました'
+                    while member.guild.voice_client.is_playing():
+                        await asyncio.sleep(0.5)
+                    tts(text)
+                    source = discord.FFmpegPCMAudio('/tmp/message.mp3')
+                    member.guild.voice_client.play(source)
+    elif after.channel is None:
+        if member.id == client.user.id:
+            presence = f'{prefix}ヘルプ | {len(client.voice_clients)}/{len(client.guilds)}サーバー'
+            await client.change_presence(activity=discord.Game(name=presence))
+        else:
+            if member.guild.voice_client:
+                if member.guild.voice_client.channel is before.channel:
+                    if len(member.guild.voice_client.channel.members) == 1:
+                        await asyncio.sleep(0.5)
+                        await member.guild.voice_client.disconnect()
+                    else:
+                        text = member.name + 'さんが退室しました'
+                        while member.guild.voice_client.is_playing():
+                            await asyncio.sleep(0.5)
+                        tts(text)
+                        source = discord.FFmpegPCMAudio('/tmp/message.mp3')
+                        member.guild.voice_client.play(source)
+    elif before.channel != after.channel:
+        if member.guild.voice_client:
+            if member.guild.voice_client.channel is before.channel:
+                if len(member.guild.voice_client.channel.members) == 1 or member.voice.self_mute:
+                    await asyncio.sleep(0.5)
+                    await member.guild.voice_client.disconnect()
+                    await asyncio.sleep(0.5)
+                    await after.channel.connect()
 
 @client.event
 async def on_command_error(ctx, error):
     orig_error = getattr(error, 'original', error)
     error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
     await ctx.send(error_msg)
-    
-@client.command()
-async def 読む(ctx):
-    await ctx.send('テキストチャンネルを【】に設定しました。')
-    
+
 @client.command()
 async def ヘルプ(ctx):
     message = f'''◆◇◆{client.user.name}の使い方◆◇◆
@@ -137,8 +184,7 @@ async def ヘルプ(ctx):
 {prefix}接続：ボイスチャンネルに接続します。
 {prefix}切断：ボイスチャンネルから切断します。'''
     await ctx.send(message)
-    
-    
+
 def tts(message):
     synthesis_input = texttospeech.SynthesisInput(text=message)
     voice = texttospeech.VoiceSelectionParams(
@@ -152,6 +198,6 @@ def tts(message):
     )
     with open('/tmp/message.mp3', 'wb') as out:
         out.write(response.audio_content)
-    
+
 
 client.run(token)
