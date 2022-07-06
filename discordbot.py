@@ -19,7 +19,7 @@ async def on_ready():
 async def 接続(ctx):
     if ctx.message.guild:
         if ctx.author.voice is None:
-            await ctx.send('ボイスチャンネルに接続してから呼び出してください。')
+            await ctx.send('ボイスチャンネルに接続してから呼び出してください。くそが！')
         else:
             if ctx.guild.voice_client:
                 if ctx.author.voice.channel == ctx.guild.voice_client.channel:
